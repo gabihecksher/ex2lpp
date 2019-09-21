@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <mpi.h>
-#define SIZE 100
+#define SIZE 10
 
 int **alloc_2d_int(int rows, int cols) {
     int *data = (int *)malloc(rows*cols*sizeof(int));
