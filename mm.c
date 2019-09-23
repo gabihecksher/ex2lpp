@@ -45,7 +45,7 @@ void main(int argc, char** argv){
         // inicializando matrizes
         for(i=0;i<SIZE;i++){
             for(j=0;j<SIZE;j++){
-                A[i][j] = 1;
+                A[i][j] = 1+i;
                 B[i][j] = 1;
                 C[i][j] = 0;
             }
@@ -57,18 +57,20 @@ void main(int argc, char** argv){
                 resultado[i][j] = 0;
             }
         }
-
+        
         int coluna = 0;
-        for(int l = 0; l < linhas_por_processo; l++){
+        int linha = 0;
+        for(int l = prim_linha; l < prim_linha+linhas_por_processo; l++){
            for(i = 0; i < SIZE; i++){
                for(j = 0; j < SIZE; j++){
-                    resultado[l][coluna] += A[i][j] * B[j][i];
+                    resultado[linha][coluna] += A[l][j] * B[j][i];
                 }
                 coluna++;
             }
+            linha++;
             coluna = 0;
         }
-
+        
         int destino = 0;
         MPI_Send(&(resultado[0][0]),
             linhas_por_processo*SIZE,
@@ -115,6 +117,21 @@ void main(int argc, char** argv){
 
     MPI_Finalize();
     if(meu_rank == 0){
+        printf("-----------------------\n");
+        for(i=0;i<SIZE;i++){
+            for(j=0;j<SIZE;j++){
+                printf("%d ", A[i][j]);
+            }
+            printf("\n");
+        }
+        printf("-----------------------\n");
+        for(i=0;i<SIZE;i++){
+            for(j=0;j<SIZE;j++){
+                printf("%d ", B[i][j]);
+            }
+            printf("\n");
+        }
+        printf("-----------------------\n");
         for(i=0;i<SIZE;i++){
             for(j=0;j<SIZE;j++){
                 printf("%d ", C[i][j]);
