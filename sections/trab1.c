@@ -50,79 +50,57 @@ int main(){
 		
 		#pragma omp sections nowait
 		{
+			// section que calcula r1, r3 e guarda a soma delas em rf1
 			#pragma omp section
 			{
-				for(i=0; i<N; i++){
-					for(j=0; j<N; j++){
-						r1[i][j] = a[i][j] + b[i][j];
-						r3[i][j] = e[i][j] + f[i][j];
-					}	
+				#pragma omp parallel shared(N,a,b,e,f,r1,r3,rf1) private(i,j) num_threads(4)
+				{
+					#pragma omp for
+						for(i=0; i<N; i++){
+							for(j=0; j<N; j++){
+								r1[i][j] = a[i][j] + b[i][j];
+								r3[i][j] = e[i][j] + f[i][j];
+							}	
+						}
+					#pragma omp for
+						for(i=0; i<N; i++){
+							for(j=0; j<N; j++){
+								rf1[i][j] = r1[i][j] + r3[i][j];
+							}	
+						}
 				}
-				// printf("R1:\n");
-				// for(i=0; i<N; i++){
-				// 	for(j=0; j<N; j++){
-				// 		printf("%d ", r1[i][j]);
-				// 	}
-				// 	printf("\n");
-				// }
-
-				// printf("R3:\n");
-				// for(i=0; i<N; i++){
-				// 	for(j=0; j<N; j++){
-				// 		printf("%d ", r3[i][j]);
-				// 	}
-				// 	printf("\n");
-				// }
-				for(i=0; i<N; i++){
-					for(j=0; j<N; j++){
-						rf1[i][j] = r1[i][j] + r3[i][j];
-					}	
-				}
-				// printf("RF:\n");
-				// for(i=0; i<N; i++){
-				// 	for(j=0; j<N; j++){
-				// 		printf("%d ", rf1[i][j]);
-				// 	}
-				// 	printf("\n");
-				// }
+				
+				
 			}
 
+			// section que calcula r2, r4 e guarda a soma delas em rf2
 			#pragma omp section
 			{
-				for(i=0; i<N; i++){
-					for(j=0; j<N; j++){
-						for(k=0; k<N; k++){
-							r2[i][j] += c[i][k] * d[k][j];
-							r4[i][j] += g[i][k] * h[k][j];
+				int somaprod2, somaprod4,linha,coluna,i;	
+					
+				#pragma omp parallel shared(c,d,g,h,N,r2,r4,somaprod2,somaprod4,rf2) private(linha,coluna,i,j) num_threads(4)
+				{
+					#pragma omp for
+						for(linha=0; linha<N; linha++){
+						    for(coluna=0; coluna<N; coluna++){
+						    	somaprod2=0;
+						    	somaprod4=0;
+						    	for(i=0; i<N; i++){
+						      		somaprod2+=c[linha][i]*d[i][coluna];
+						      		somaprod4+=g[linha][i]*h[i][coluna];
+						     	} 
+						    	r2[linha][coluna]=somaprod2;
+						    	r4[linha][coluna]=somaprod4;
+						    }
 						}
-					}
+					#pragma omp for
+						for(i=0; i<N; i++){
+							for(j=0; j<N; j++){
+								rf2[i][j] = r2[i][j] + r4[i][j];
+							}	
+						}
 				}
-				// printf("R2:\n");
-				// for(i=0; i<N; i++){
-				// 	for(j=0; j<N; j++){
-				// 		printf("%d ", r2[i][j]);
-				// 	}
-				// 	printf("\n");
-				// }
-				// printf("R4:\n");
-				// for(i=0; i<N; i++){
-				// 	for(j=0; j<N; j++){
-				// 		printf("%d ", r4[i][j]);
-				// 	}
-				// 	printf("\n");
-				// }
-			    for(i=0; i<N; i++){
-					for(j=0; j<N; j++){
-						rf2[i][j] = r2[i][j] + r4[i][j];
-					}	
-				}
-				// printf("RF2:\n");
-				// for(i=0; i<N; i++){
-				// 	for(j=0; j<N; j++){
-				// 		printf("%d ", rf2[i][j]);
-				// 	}
-				// 	printf("\n");
-				// }
+				
 			}
 
 		}//end of sections      
@@ -130,6 +108,20 @@ int main(){
 		//usar critical em vez de atomic quando for varias intruçoes
 		
 	}//end of parallel region
+	printf("matriz rf1:\n");
+	for(i=0; i<N; i++){
+		for(j=0; j<N; j++){
+			printf("%d ", rf1[i][j]);
+		}
+		printf("\n");
+	}
+	printf("matriz rf2:\n");
+	for(i=0; i<N; i++){
+		for(j=0; j<N; j++){
+			printf("%d ", rf2[i][j]);
+		}
+		printf("\n");
+	}
 	for(i=0; i<N; i++){
 		for(j=0; j<N; j++){
 			resultado[i][j] += rf1[i][j];
