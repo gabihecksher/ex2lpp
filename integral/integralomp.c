@@ -5,7 +5,7 @@ int main(int argc, char** argv){
 	float a=0.0, b=1; //intervalo a calcular
 	int n = 1024; //numero de trapezoides
 	float h; //base do trapezoide
-	float integral; //resultado
+	float resultado_integral; //resultado
 	int num_threads = 4;
 
 	float f(float x) {
@@ -39,9 +39,9 @@ int main(int argc, char** argv){
 
 	h = (b-a) / n;
 
-	integral = calcula(a, b, n, h);
+	resultado_integral = calcula(a, b, n, h);
 
-	printf("\n\nresultado: %f\n", integral);
+	printf("\n\nresultado: %f\n", resultado_integral);
 }
 
 //terminar o trab das sections e
