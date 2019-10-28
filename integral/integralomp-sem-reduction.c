@@ -19,8 +19,12 @@ int main(int argc, char** argv){
 	float calcula(float local_a, float local_b, int local_n, float h) {
         int i;
 	    float vet_integral[num_threads];
-        for(i=0; i<num_threads; i++){
-            vet_integral[i] = 0; //inicializando vetor com 0
+        #pragma omp parallel shared(vet_integral, num_threads) private(i) num_threads(num_threads)
+        {
+            #pragma omp for
+            for(i=0; i<num_threads; i++){
+                vet_integral[i] = 0.0; //inicializando vetor com 0
+            } 
         }
 	    float x;
 	    f(x); // função a integrar
@@ -44,7 +48,7 @@ int main(int argc, char** argv){
         } //somando pra ter o valor final da integral
 
 	    return soma_integral;
-	}
+	} //fim funcao calcula
 
 	h = (b-a) / n;
 
