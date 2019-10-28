@@ -2,8 +2,8 @@
 #include<omp.h>
 
 int main(int argc, char** argv){
-	float a=0.0, b=1.0; //intervalo a calcular
-	int n = 1024; //numero de trapezoides
+	float a=0.0, b=4.0; //intervalo a calcular
+	int n = 8; //numero de trapezoides
 	float h; //base do trapezoide
 	float integral; //resultado
 	
@@ -18,17 +18,23 @@ int main(int argc, char** argv){
 		float integral;
 		float x, i;
 		f(x); // função a integrar
-		integral = ( f(a) + f(b) ) /2.0;
-		x = a;
-		#pragma omp parallel shared(h, n) private(i, x) reduction(+:integral)
+		integral = ( f(local_a) + f(local_b) ) /2.0;
+		x = local_a;
+		#pragma omp parallel shared(h, local_n) private(i, x) reduction(+:integral) num_threads(4)
 		{
+            int iam = omp_get_thread_num();
+            int nt = 44;
+            float trap_por_thread = n/nt;
+		    x = local_a + trap_por_thread * h * iam;
+
 		#pragma omp for
-		for(int i=1; i<=n; i++) {
+		for(int i=1; i<local_n; i++) {
 			x += h;
 			integral += f(x);
+		    printf("iam %d, x: %f\n", iam, x);
 		}
 		integral *= h;
-		printf("resultado: %f\n", integral);
+		//printf("resultado: %f\n", integral);
 		}
 		return integral;
 	}
