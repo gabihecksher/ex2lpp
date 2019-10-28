@@ -137,5 +137,3 @@ int main(){
 	}
 		
 }
-
-//falta colocar o paralelismo de dados
